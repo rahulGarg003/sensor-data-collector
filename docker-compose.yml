@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  mqtt:
+    container_name: mqtt
+    image: eclipse-mosquitto:2.0.16
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mqtt/config:/mosquitto/config
+      - ./mqtt/data:/mosquitto/data
+      - ./mqtt/log:/mosquitto/log
+  
+  sensor-simulator-1:
+    container_name: sensor-simulator-1
+
+    build: ./sensor-simulator/.
+    depends_on:
+      - mqtt
+    environment:
+      SENSOR-ID: 1
+    volumes:
+      - ./sensor-simulator:/myapp
+
+volumes:
+  mqtt:
+  sensor-simulator:
