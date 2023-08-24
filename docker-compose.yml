@@ -3,6 +3,7 @@ version: '3.8'
 services:
   mosquitto:
     container_name: mqtt
+    restart: unless-stopped
     image: eclipse-mosquitto:2.0.16
     ports:
       - 1883:2883
@@ -16,6 +17,7 @@ services:
   
   sensor-simulator-1:
     container_name: sensor-simulator-1
+    restart: unless-stopped
     build: ./sensor-simulator/.
     depends_on:
       - mosquitto
@@ -24,10 +26,25 @@ services:
       MQQT-HOSTNAME: mosquitto
       MQQT-PORT: 2883
       MQQT-TOPIC-TEMPRATURE: 'sensor/temprature'
+      MQQT-TOPIC-HUMIDITY: 'sensor/humidity'
     volumes:
       - ./sensor-simulator:/myapp
     networks:
       - mosquitto
+  
+  mongodb:
+    container_name: mongodb
+    restart : unless-stopped
+    image: mongo:7.0.1-rc0-jammy
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_admin
+      MONGO_INITDB_ROOT_PASSWORD: mongo_admin
+    networks:
+      - mongodb
+    
+    
 
 volumes:
   mosquitto:
@@ -35,4 +52,6 @@ volumes:
 
 networks:
   mosquitto:
+    driver: bridge
+  mongodb:
     driver: bridge
