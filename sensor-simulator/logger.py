@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 
 # LOG_FILE=f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
-LOG_FILE = f"{os.environ.get('SENSOR-ID', 1)}.log"
+LOG_FILE = f"{os.environ.get('SENSOR_ID', 1)}.log"
 # logs_path=os.path.join(os.getcwd(),"logs",LOG_FILE)
 logs_path=os.path.join(os.getcwd(),"logs")
 os.makedirs(logs_path,exist_ok=True)
