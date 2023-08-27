@@ -15,18 +15,20 @@ services:
     networks:
       - mosquitto
   
-  sensor-simulator-1:
-    container_name: sensor-simulator-1
+  sensor-simulator:
+    container_name: sensor-simulator
     restart: unless-stopped
     build: ./sensor-simulator/.
     depends_on:
       - mosquitto
     environment:
-      SENSOR-ID: sensor-simulator-1
-      MQQT-HOSTNAME: mosquitto
-      MQQT-PORT: 2883
-      MQQT-TOPIC-TEMPRATURE: 'sensor/temprature'
-      MQQT-TOPIC-HUMIDITY: 'sensor/humidity'
+      SENSOR_ID: sensor-simulator
+      MQQT_HOSTNAME: mosquitto
+      MQQT_PORT: 2883
+      MQQT_TOPIC_TEMPRATURE: 'sensor/temprature'
+      MQQT_TOPIC_HUMIDITY: 'sensor/humidity'
+      SQL_DB_NAME: 'sensor_simulator'
+      SQL_DB_TABLE_NAME: 'unpublished_data'
     volumes:
       - ./sensor-simulator:/myapp
     networks:
@@ -41,14 +43,36 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo_admin
       MONGO_INITDB_ROOT_PASSWORD: mongo_admin
+    volumes:
+      - ./mongodb/data:/data/db
     networks:
       - mongodb
-    
-    
+  
+  data-collector:
+    container_name: data-collector
+    restart: unless-stopped
+    build: ./data-collector/.
+    depends_on:
+      - mosquitto
+      - mongodb
+    environment:
+      MQQT_HOSTNAME: mosquitto
+      MQQT_PORT: 2883
+      MQQT_TOPIC: 'sensor/#'
+      MONGO_DB_USERNAME: mongo_admin
+      MONGO_DB_PASSWORD: mongo_admin
+      MONGO_DB_HOSTNAME: mongodb
+      MONGO_DB_NAME: sensordata
+    volumes:
+      - ./data-collector:/myapp
+    networks:
+      - mosquitto
+      - mongodb
 
 volumes:
   mosquitto:
   sensor-simulator:
+  data-collector:
 
 networks:
   mosquitto:
