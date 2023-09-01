@@ -3,9 +3,10 @@ import paho.mqtt.client as mqtt
 from datetime import datetime
 import time
 import sqlite3
+import threading
 
 from logger import logging
-from utils import get_temprature_data, get_humidity_data, insert_unpublished_data_to_db
+from utils import get_temprature_data, get_humidity_data, insert_unpublished_data_to_db, publish_data_from_local_db
 
 time.sleep(10)
 
@@ -40,7 +41,12 @@ def on_connect(client, userdata, flags, rc):
         logging.error("Not able to publish message to MQTT Broker, saving data to local db")
         insert_unpublished_data_to_db(MQQT_TOPIC_HUMIDITY, data_humidity)
 
+    thread = threading.Thread(target=publish_data_from_local_db, args=(client,))
+    thread.start()
+    logging.info("thread started")
     time.sleep(5)
+    thread.join(timeout=5.0)
+    logging.info("thread finished")
 
 def on_connect_fail():
     data_temprature = get_temprature_data(sensor_id=f'{SENSOR_ID}-{MQQT_TOPIC_TEMPRATURE}')
