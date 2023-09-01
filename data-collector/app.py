@@ -29,7 +29,7 @@ def on_message(client, userdata, msg):
         dbName=MONGO_DB_NAME    
     )
     mongodb.insert_data_to_collection(
-        collectionName=msg.topic,
+        collectionName=msg.topic.replace('_localdb',''),
         message=msg.payload
     )
 
