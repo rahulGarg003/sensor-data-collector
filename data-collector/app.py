@@ -5,33 +5,29 @@ import json
 import paho.mqtt.client as mqtt
 
 from logger import logging
-from utils import MongoDB
+from utils import insert_data_to_mongodb_collection, cache_last_ten_readings_to_redis
 
 time.sleep(10)
 
 MQQT_HOSTNAME = os.environ.get("MQQT_HOSTNAME", 'localhost')
 MQQT_PORT = int(os.environ.get("MQQT_PORT", 1883))
 MQQT_TOPIC = os.environ.get('MQQT_TOPIC','sensor/#')
-MONGO_DB_USERNAME = os.environ.get('MONGO_DB_USERNAME')
-MONGO_DB_PASSWORD = os.environ.get('MONGO_DB_PASSWORD')
-MONGO_DB_HOSTNAME = os.environ.get('MONGO_DB_HOSTNAME')
-MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME')
+
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe(MQQT_TOPIC)
 
 def on_message(client, userdata, msg):
     logging.info(f"Received message: {msg.topic} - {str(msg.payload)}")
-    mongodb = MongoDB(
-        host=MONGO_DB_HOSTNAME, 
-        userName=MONGO_DB_USERNAME, 
-        password=MONGO_DB_PASSWORD,
-        dbName=MONGO_DB_NAME    
-    )
-    mongodb.insert_data_to_collection(
+
+    insert_data_to_mongodb_collection(
         collectionName=msg.topic.replace('_localdb',''),
         message=msg.payload
     )
+
+    if('_localdb' not in msg.topic):
+        cache_last_ten_readings_to_redis(keyName=f'last_ten_{msg.topic}', message=msg.payload)
+
 
 # Create MQTT client
 mqtt_client = mqtt.Client()
