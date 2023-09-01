@@ -25,7 +25,7 @@ services:
       SENSOR_ID: sensor-simulator
       MQQT_HOSTNAME: mosquitto
       MQQT_PORT: 2883
-      MQQT_TOPIC_TEMPRATURE: 'sensor/temprature'
+      MQQT_TOPIC_TEMPRATURE: 'sensor/temperature'
       MQQT_TOPIC_HUMIDITY: 'sensor/humidity'
       SQL_DB_NAME: 'sensor_simulator'
       SQL_DB_TABLE_NAME: 'unpublished_data'
@@ -38,6 +38,7 @@ services:
     container_name: mongodb
     restart : unless-stopped
     image: mongo:7.0.1-rc0-jammy
+    command: mongod --quiet --logpath /dev/null 
     ports:
       - 27017:27017
     environment:
