@@ -17,7 +17,21 @@ class MongoDB(object):
     def insert_data_to_collection(self, collectionName: str, message):
         try:
             data = json.loads(message)
+            _id = data['timestamp'][:10].replace('-', '')
             collection = self.db[collectionName.replace('/','_')]
-            collection.insert_one(data)
+            # collection.insert_one(data)
+            if(collection.find_one({"_id": _id})):
+                collection.update_one(
+                    filter = {"_id" : _id},
+                    update = {'$push' : {"values": data}}
+                )
+            else:
+                collection.insert_one(
+                    {
+                        "_id": _id,
+                        "values": [data]
+                    }
+                )
         except Exception as e:
             logging.exception(e)
+
