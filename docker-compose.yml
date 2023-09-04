@@ -23,12 +23,10 @@ services:
       - mosquitto
     environment:
       SENSOR_ID: sensor-simulator
-      MQQT_HOSTNAME: mosquitto
-      MQQT_PORT: 2883
-      MQQT_TOPIC_TEMPRATURE: 'sensor/temperature'
-      MQQT_TOPIC_HUMIDITY: 'sensor/humidity'
       SQL_DB_NAME: 'sensor_simulator'
       SQL_DB_TABLE_NAME: 'unpublished_data'
+    env_file:
+      - .env
     volumes:
       - ./sensor-simulator:/myapp
     networks:
@@ -48,6 +46,17 @@ services:
       - ./mongodb/data:/data/db
     networks:
       - mongodb
+
+  redisdb:
+    container_name: redisdb
+    restart : unless-stopped
+    image: redis:7.2.0-alpine3.18
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redisdb/data:/data
+    networks:
+      - redisdb
   
   data-collector:
     container_name: data-collector
@@ -56,27 +65,45 @@ services:
     depends_on:
       - mosquitto
       - mongodb
+      - redisdb
     environment:
-      MQQT_HOSTNAME: mosquitto
-      MQQT_PORT: 2883
       MQQT_TOPIC: 'sensor/#'
-      MONGO_DB_USERNAME: mongo_admin
-      MONGO_DB_PASSWORD: mongo_admin
-      MONGO_DB_HOSTNAME: mongodb
-      MONGO_DB_NAME: sensordata
+    env_file:
+      - .env
     volumes:
       - ./data-collector:/myapp
     networks:
       - mosquitto
       - mongodb
+      - redisdb
+  
+  web-api:
+    container_name: web-api
+    restart: unless-stopped
+    build: ./web-api/.
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongodb
+      - redisdb
+    env_file:
+      - .env
+    volumes:
+      - ./web-api:/myapp
+    networks:
+      - mongodb
+      - redisdb
 
 volumes:
   mosquitto:
   sensor-simulator:
   data-collector:
+  redisdb:
 
 networks:
   mosquitto:
     driver: bridge
   mongodb:
+    driver: bridge
+  redisdb:
     driver: bridge
