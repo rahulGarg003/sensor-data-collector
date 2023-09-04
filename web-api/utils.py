@@ -59,11 +59,11 @@ def get_data_from_mongodb(collectionName: str, strdt: date, enddt: date):
         db = mongo_client[MONGO_DB_NAME]
         date_list = [(strdt+timedelta(days=x)).isoformat().replace('-', '') for x in range((enddt-strdt).days + 1)]
         collection = db[collectionName.replace('/','_')]
-        data = []
-        for _date in date_list:
-            if(collection.find_one({"_id": _date})):
-                data.append(collection.find_one({"_id": _date}))
-        return data
+        return [
+            collection.find_one({"_id": _date})
+            for _date in date_list
+            if (collection.find_one({"_id": _date}))
+        ]
     except Exception as e:
         logging.exception(e)
 
