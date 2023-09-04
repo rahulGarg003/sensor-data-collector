@@ -6,11 +6,11 @@ import redis
 from logger import logging
 
 
-MONGO_DB_USERNAME = os.environ.get('MONGO_DB_USERNAME')
-MONGO_DB_PASSWORD = os.environ.get('MONGO_DB_PASSWORD')
-MONGO_DB_HOSTNAME = os.environ.get('MONGO_DB_HOSTNAME')
-MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME')
-REDIS_DB_HOSTNAME = os.environ.get('REDIS_DB_HOSTNAME')
+MONGO_DB_USERNAME = os.environ['MONGO_DB_USERNAME']
+MONGO_DB_PASSWORD = os.environ['MONGO_DB_PASSWORD']
+MONGO_DB_HOSTNAME = os.environ['MONGO_DB_HOSTNAME']
+MONGO_DB_NAME = os.environ['MONGO_DB_NAME']
+REDIS_DB_HOSTNAME = os.environ['REDIS_DB_HOSTNAME']
 
 def insert_data_to_mongodb_collection(collectionName: str, message):
     try:
@@ -39,10 +39,10 @@ def insert_data_to_mongodb_collection(collectionName: str, message):
 def cache_last_ten_readings_to_redis(keyName, message):
     try:
         number_of_readings_to_cached = 10
-        key = keyName.replace("/","_")
+        key = f'last_ten_{keyName.replace("/","_")}'
         data = message
         redis_conn = redis.StrictRedis(host = REDIS_DB_HOSTNAME)
-        if redis_conn.exists(key) != 0 and redis_conn.llen(key) >= number_of_readings_to_cached:
+        if redis_conn.exists(key) != 0 and redis_conn.llen(key) >= number_of_readings_to_cached: # type: ignore
             redis_conn.lpop(key)
         redis_conn.rpush(key, data)
         logging.info(f"data cached to redis with key: {key} and data: {data}")

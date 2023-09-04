@@ -26,7 +26,7 @@ def on_message(client, userdata, msg):
     )
 
     if('_localdb' not in msg.topic):
-        cache_last_ten_readings_to_redis(keyName=f'last_ten_{msg.topic}', message=msg.payload)
+        cache_last_ten_readings_to_redis(keyName=msg.topic, message=msg.payload)
 
 
 # Create MQTT client
