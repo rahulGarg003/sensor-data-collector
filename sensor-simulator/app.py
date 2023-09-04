@@ -15,7 +15,7 @@ MQQT_HOSTNAME = os.environ.get("MQQT_HOSTNAME", 'localhost')
 MQQT_PORT = int(os.environ.get("MQQT_PORT", 1883))
 # mqtt_broker_username = 'mqtt-admin'
 # mqtt_broker_password = 'mqtt-admin'
-MQQT_TOPIC_TEMPRATURE = os.environ.get('MQQT_TOPIC_TEMPRATURE','sensor/temprature')
+MQQT_TOPIC_TEMPRATURE = os.environ.get('MQQT_TOPIC_TEMPERATURE','sensor/temprature')
 MQQT_TOPIC_HUMIDITY = os.environ.get('MQQT_TOPIC_HUMIDITY', 'sensor/humidity')
 
 def on_connect(client, userdata, flags, rc):

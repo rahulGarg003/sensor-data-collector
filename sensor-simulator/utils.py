@@ -1,7 +1,7 @@
 import os
 import json
 from random import randint
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 import sqlite3
 
 from logger import logging
@@ -10,7 +10,14 @@ def get_temprature_data(sensor_id):
     data = {
         "sensor_id": sensor_id, 
         "value": randint(5, 50), 
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(
+                        tz=timezone(
+                            offset=timedelta(
+                                hours=float(os.environ.get('TIMEZONE_OFFSET_HOURS', 5)),
+                                minutes=float(os.environ.get('TIMEZONE_OFFSET_MINUTES', 30))
+                            )
+                        )
+                    ).isoformat()
     }
     return json.dumps(data)
 
@@ -18,7 +25,14 @@ def get_humidity_data(sensor_id):
     data = {
         "sensor_id": sensor_id, 
         "value": randint(40, 100), 
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now(
+                        tz=timezone(
+                            offset=timedelta(
+                                hours=float(os.environ.get('TIMEZONE_OFFSET_HOURS', 5)),
+                                minutes=float(os.environ.get('TIMEZONE_OFFSET_MINUTES', 30))
+                            )
+                        )
+                    ).isoformat()
     }
     return json.dumps(data)
 
